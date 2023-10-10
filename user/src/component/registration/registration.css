@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+*{
+  margin: 0;
+  padding: 0;box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.form-container {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  padding-left: 10px;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+}
+
+.form-wrapper {
+  max-width: 700px;
+  width: 100%;
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 10px;
+}
+
+.form-wrapper .form-title {
+  font-size: 25px;
+  font-weight: 500;
+  position: relative;
+}
+
+.form-wrapper .form-title::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 30px;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+}
+
+
+.form-container form .user-details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  
+  margin: 20px 0 12px 0;
+}
+
+form .user-details .form-group {
+  margin-bottom: 15px;
+  width: calc(100% / 2 - 20px);
+}
+
+.user-details .form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.user-details .form-group input {
+  height: 45px;
+  width: 100%;
+  outline: none;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding-left: 15px;
+  font-size: 16px;
+  border-bottom-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.user-details .form-group input:focus,
+.user-details .form-group input:valid {
+  border-color: #9b59b6;
+}
+
+
+.phone-code {
+ display: flex;
+}
+
+#countryCode {
+  width: 70px;
+}
+
+.user-details .form-group select {
+  height: 45px;
+  width: 100%;
+  outline: none;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding-left: 15px;
+  font-size: 16px;
+  border-bottom-width: 2px;
+}
+
+button{
+  height: 40px;
+  width: 100%;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  margin: 10px 50px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+

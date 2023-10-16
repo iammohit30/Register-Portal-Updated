@@ -3,10 +3,7 @@ const mongoose = require("mongoose");
 const RegisterSchema = new mongoose.Schema({
   firstname: String,
   lastname: String,
-  profilePicture: {
-    data: Buffer, 
-    contentType: String,
-  },
+  profilePicture: String,
   dob: {
     type: Date,
     required: false,
@@ -20,7 +17,6 @@ const RegisterSchema = new mongoose.Schema({
     lowercase: true,
     validate: {
       validator: (value) => {
-        // Use a regular expression to validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(value);
       },
@@ -31,6 +27,8 @@ const RegisterSchema = new mongoose.Schema({
   nationality: String,
   countryOfResidence: String,
   state: String,
+  userDetailsLink: String,
+  registrationDate: Date,
 });
 
 const RegisterModel = mongoose.model("register", RegisterSchema);

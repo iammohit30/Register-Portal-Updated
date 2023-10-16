@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import "./registration.css";
 import axios from "axios";
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import { Link, useNavigate } from 'react-router-dom';
+
 
 const RegistrationForm = () => {
+
+  const navigate = useNavigate();
 
   const countryToStates = {
     india: ['Delhi', 'Mumbai', 'Bangalore', 'Pune', 'Hyderabad', 'Patna', 'Uttar Pradesh'], 
@@ -21,108 +22,10 @@ const RegistrationForm = () => {
     });
   };
 
-
-  const generatePDF = () => {
-    const pdfTitle = `${formData.firstname}_${formData.lastname}.pdf`;
-    const content = [];
-  
-  
-    if (formData.profilePicture) {
-  
-      const reader = new FileReader();
-  
-      reader.onload = () => {
-  
-        const docDefinition = {
-          content: [
-            { text: 'User Registration Details', style: 'header', alignment: "center" },
-            '\n\n',
-            { image: reader.result, width: 100, height: 100, alignment: 'center' },
-            "\n",
-            {
-              columns: [
-                {
-                  width: '50%',
-                  stack: [
-                    "\n",
-                    { text: 'First Name:', style: 'subheader' },
-                    "\n",
-                    { text: 'Last Name:', style: 'subheader' },
-                    "\n",
-                    { text: 'Date of Birth:', style: 'subheader' },
-                    "\n",
-                    { text: 'Gender:', style: 'subheader' },
-                    "\n",
-                    { text: 'Email:', style: 'subheader' },
-                    "\n",
-                    { text: 'Phone Number:', style: 'subheader' },
-                    "\n",
-                    { text: 'Nationality:', style: 'subheader' },
-                    "\n",
-                    { text: 'Country of Residence:', style: 'subheader' },
-                    "\n",
-                    { text: 'State:', style: 'subheader' },
-
-                  ],
-                },
-                {
-                  width: '50%',
-                  stack: [
-                    "\n",
-                    formData.firstname,
-                    "\n",
-                    formData.lastname,
-                    "\n",
-                    formData.dob,
-                    "\n",
-                    formData.gender,
-                    "\n",
-                    formData.email,
-                    "\n",
-                    formData.phoneNumber,
-                    "\n",
-                    formData.nationality,
-                    "\n",
-                    formData.countryOfResidence,
-                    "\n",
-                    formData.state,
-                  ],
-                },
-              ],
-            },
-            
-          ],
-          styles: {
-            header: { fontSize: 18, bold: true },
-            subheader: { fontSize: 13, bold: false },
-          },
-        };
-        
-        pdfMake.createPdf(docDefinition).download(pdfTitle);
-        
-      };
-  
-      reader.readAsDataURL(formData.profilePicture);
-    } else {
-      const docDefinition = {
-        content: content,
-        styles: {
-          header: { fontSize: 18, bold: true },
-          subheader: { fontSize: 14, bold: true },
-        },
-      };
-  
-      pdfMake.createPdf(docDefinition).download(pdfTitle);
-    }
-  };
-    
-  
-  
-
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
-    profilePicture: null,
+    profilePicture: "",
     dob: "",
     gender: "",
     email: "",
@@ -132,32 +35,60 @@ const RegistrationForm = () => {
     state: "",
   });
 
-  const handleChange = (e) => {
+
+  const [phoneNumberLength, setPhoneNumberLength] = useState(0);
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [imageSizeError, setImageSizeError] = useState(false)
+
+  const handleChange = async (e) => {
+    e.preventDefault();
     const { name, type } = e.target;
+
+    if (name === 'phoneNumber') {
+      const phoneNumber = e.target.value;
+      setPhoneNumberLength(phoneNumber.length);
+  
+      if (phoneNumber.length !== 10) {
+        setPhoneNumberError('Phone number should be 10 digits');
+      } else {
+        setPhoneNumberError('');
+      }
+    }
   
     if (type === "file") {
       const file = e.target.files[0];
   
       if (file) {
+        if (file.size <= 1048576) {
         const reader = new FileReader();
   
         reader.onload = (event) => {
-          const profilePictureBlob = new Blob([event.target.result], { type: file.type });
-  
-          setFormData({ ...formData, [name]: profilePictureBlob });
+          setFormData({ ...formData, [name]: event.target.result });
+          setImageSizeError(false)
         };
   
-        reader.readAsArrayBuffer(file);
+        reader.readAsDataURL(file);
+      } else{
+        setRegistrationStatus("Failure")
+        setImageSizeError(true)
+      }
       }
     } else {
       setFormData({ ...formData, [name]: e.target.value });
     }
   };
-
-  const [registrationStatus, setRegistrationStatus] = useState(null);
   
+  const [registrationStatus, setRegistrationStatus] = useState(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (calculateAge(formData.dob) < 18 || imageSizeError) {
+      setRegistrationStatus('Failure');
+      console.log("Registration Failure\nAge or Image does not match the criteria")
+      return;
+    }
+
     const formDataToSend = new FormData();
   
     for (const key in formData) {
@@ -166,26 +97,39 @@ const RegistrationForm = () => {
   
     try {
       const response = await axios.post("http://localhost:3001/register", formDataToSend);
-      console.log(response.status)
-      console.log(response.data)
-      if(response.status === 200 && response.data.success){
-        setRegistrationStatus("Success")
-      } else if(response.data.failure) {
-        setRegistrationStatus("Failure")
-      } else {      }
-
+      navigate("/userList")
+      if (response.status === 200 && response.data.success) {
+        setRegistrationStatus("Success");
+      } else {
+        setRegistrationStatus("Failure");
+      }
     } catch (error) {
       console.error("Axios error:", error);
-      setRegistrationStatus("Failure")
+      setRegistrationStatus("Failure");
     }
+  };
+
+  const calculateAge = (dob) => {
+    const dobDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - dobDate.getFullYear();
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+      return age - 1;
+    }
+    return age;
   };
   
   return (
     <div className="form-container">
-      
         <form onSubmit={handleSubmit}>
           <div className="form-wrapper">
+            <div className="form-header">
           <div className="form-title">Registration Form</div>
+          <Link to="/">
+          <button className='headerBtn'>Back</button>
+          </Link>
+          </div>
           <div className="user-details">
             <div className="form-group">
             
@@ -217,8 +161,7 @@ const RegistrationForm = () => {
                 onChange={handleChange}
             />
             </div>
-
-            
+  
             {/* DOB */}
 
             <div className="form-group">
@@ -226,6 +169,9 @@ const RegistrationForm = () => {
             <label className="lbl" htmlFor="dob">
               Date of Birth:
             </label>
+            {formData.dob && calculateAge(formData.dob) < 18 && (
+              <div className="error-message">Age must be 18 or above to register.</div>
+            )}
 
             <input 
               type="date"
@@ -236,7 +182,6 @@ const RegistrationForm = () => {
             />
 
             </div>
-
             
             {/* Email Address */}
 
@@ -262,11 +207,13 @@ const RegistrationForm = () => {
             <label className="lbl" htmlFor="phoneNumber">
                 Phone Number:
             </label>
+            {phoneNumberError && (
+              <div className="error-message">{phoneNumberError}</div>
+            )}
             <div className="phone-code">
             <select 
               id="countryCode"  
               name="countryCode"
-              // defaultValue="" 
               required
             >
               
@@ -284,9 +231,6 @@ const RegistrationForm = () => {
               </option>
             </select>
             
-
-          
-
             <input 
               type="tel" 
               id="phoneNumber"
@@ -330,7 +274,6 @@ const RegistrationForm = () => {
               id="gender" 
               name="gender" 
               value={formData.gender} 
-              // defaultValue="" 
               onChange={handleChange} 
               required
             >
@@ -350,9 +293,6 @@ const RegistrationForm = () => {
             </div>
             </div>
 
-            
-            
-
             {/* Country */}
 
             <div className="form-group">
@@ -368,7 +308,6 @@ const RegistrationForm = () => {
               value={formData.countryOfResidence}
               onChange={handleCountryChange}
               placeholder="Country Of Residence" 
-              // defaultValue="" 
               required
             >
                 <option value="" disabled>Select Country</option>
@@ -381,7 +320,6 @@ const RegistrationForm = () => {
 
             {/* State */}
 
-
             <div className="form-group">
               <div className="form-state-lbl">
 
@@ -393,7 +331,6 @@ const RegistrationForm = () => {
               name="state" 
               value={formData.state}
               onChange={handleChange}
-              // defaultValue="" 
               required
             >
                 
@@ -413,7 +350,9 @@ const RegistrationForm = () => {
             {/* Profile Picture */}
 
             <div  className="form-group">
-            
+            { imageSizeError && (
+            <div className="error-message">Image size must be 1 MB or less.</div>
+          )}
             
             <label className="lbl custom-file-upload" htmlFor="profilePicture">
               Upload your Image
@@ -428,18 +367,17 @@ const RegistrationForm = () => {
             />
 
             </div>
-
             <div className="form-group">
       
-      {registrationStatus === "success" && (
-        <div className="success-message">User registered Successfully</div>
-      )}
-      {registrationStatus === "failure" && (
-        <div className="error-message">User registration failed</div>
-      )}
-    </div>
+              {registrationStatus === "success" && (
+                <div className="success-message">User registered Successfully</div>
+              )}
+              {registrationStatus === "failure" && (
+                <div className="error-message">User registration Failed</div>
+              )}
+          </div>
+          
           <button className="btn" type="submit">Register</button>
-          <button className="btn" type="button" onClick={generatePDF}>Download Form</button>
     </div>
    </div>
   </form>

@@ -36,7 +36,7 @@ const RegistrationForm = () => {
   });
 
 
-  const [phoneNumberLength, setPhoneNumberLength] = useState(0);
+  const [, setPhoneNumberLength] = useState(0);
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [imageSizeError, setImageSizeError] = useState(false)
 
@@ -350,14 +350,14 @@ const RegistrationForm = () => {
             {/* Profile Picture */}
 
             <div  className="form-group">
-            { imageSizeError && (
-            <div className="error-message">Image size must be 1 MB or less.</div>
-          )}
             
             <label className="lbl custom-file-upload" htmlFor="profilePicture">
               Upload your Image
             </label>
 
+            { imageSizeError && (
+            <div className="error-message">Image size must be 1 MB or less.</div>
+            )}
             <input
                 type="file"
                 className='custom-file-input'

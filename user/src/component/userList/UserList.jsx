@@ -14,6 +14,9 @@ const UserList = () => {
     console.log("Generate PDF function called");
     const pdfTitle = `${user.firstname}_${user.lastname}.pdf`;
     console.log("PDF Title:", pdfTitle);
+
+    // const base64ImageData = user.profilePicture;
+    // const dataURL = `data:image/png;base64,${base64ImageData}`;
   
     const docDefinition = {
       content: [
@@ -79,9 +82,20 @@ const UserList = () => {
     };
     console.log('Registration Date:', user.registrationDate);
 
+    // const pdfDoc = pdfMake.createPdf(docDefinition);
+
     const pdfDoc = pdfMake.createPdf(docDefinition);
-    pdfDoc.open()
+    // pdfDoc.open()
     pdfDoc.download(pdfTitle);
+
+    // pdfDoc.getBlob((blob) => {
+    //   const url = URL.createObjectURL(blob);
+    //   const a = document.createElement('a');
+    //   a.href = url;
+    //   a.download = `${user.firstname}_${user.lastname}.pdf`;
+    //   a.click();
+    //   URL.revokeObjectURL(url);
+    // });
   };
 
   useEffect(() => {

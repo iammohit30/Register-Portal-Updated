@@ -2,8 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
-const pdfMake = require("pdfmake/build/pdfmake");
-const pdfFonts = require("pdfmake/build/vfs_fonts");
 const RegisterModel = require("./model/Register");
 
 const app = express();
@@ -13,7 +11,6 @@ app.use(fileUpload());
 
 mongoose.connect("mongodb://127.0.0.1:27017/test");
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs
 
 app.post("/register", async (req, res) => {
   const formData = req.body;
